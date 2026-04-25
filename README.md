@@ -97,6 +97,25 @@ MarkNav installs its Python dependencies automatically.
 
 You still need ITK-SNAP installed separately.
 
+### Dependency Download Links
+
+Install these first if they are missing:
+
+| Dependency | Who needs it | Download link |
+| --- | --- | --- |
+| Python 3 | macOS and Windows users, required for MarkNav scripts | [Python official downloads](https://www.python.org/downloads/) |
+| ITK-SNAP | macOS and Windows users, required for manual target drawing | [ITK-SNAP official downloads](https://www.itksnap.org/download/snap/) |
+
+Python packages installed by the MarkNav installer:
+
+| Python package | Purpose | Link |
+| --- | --- | --- |
+| `numpy` | Array and mask processing | [numpy on PyPI](https://pypi.org/project/numpy/) |
+| `pydicom` | DICOM reading and writing | [pydicom on PyPI](https://pypi.org/project/pydicom/) |
+| `SimpleITK` | DICOM/NIfTI conversion and image registration | [SimpleITK on PyPI](https://pypi.org/project/SimpleITK/) |
+
+You usually do not need to install the Python packages manually. The `01_*_INSTALL_dependencies` file installs them for you.
+
 Expected ITK-SNAP locations:
 
 ```text
