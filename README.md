@@ -2,11 +2,13 @@
 
 Standalone T1 + FLAIR target marking pathway for manual target marking and DICOM navigation export.
 
-This page is written for first-time users. If you are not technical, start at **Download** and follow the numbered steps.
+This pathway is intended for neurologists, neurosurgeons, and neuroradiologists who need a simple manual target marking workflow.
+
+This page is written for first-time users. If you are not technical or not familiar with ITK-SNAP, start at **Download** and follow the numbered steps.
 
 ## What MarkNav Does
 
-MarkNav helps prepare MRI images for manual target marking:
+MarkNav helps clinical neuro teams prepare MRI images for manual target marking:
 
 1. You choose one patient MRI DICOM folder.
 2. MarkNav finds the T1 and FLAIR series.
