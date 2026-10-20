@@ -1,239 +1,125 @@
 # MarkNav Manual Navigation
 
-Standalone T1 + FLAIR target marking pathway for manual target marking and DICOM navigation export.
+MarkNav prepares MRI images for manual marking of a target already selected by the treating team, then exports that saved marking within derived DICOM images. It links image preparation, manual target drawing in ITK-SNAP and image export. It does not independently identify focal cortical dysplasia, determine the epileptogenic zone or recommend resection boundaries.
 
-This pathway is intended for neurologists, neurosurgeons, and neuroradiologists who need a simple manual target marking workflow.
+## Current source: v2026.10.20
 
-This page is written for first-time users. If you are not technical or not familiar with ITK-SNAP, start at **Download** and follow the numbered steps.
+The corrected Python workflow is available in the [v2026.10.20 source release](https://github.com/epilepsyassociates-creator/marknav-manual-navigation/releases/tag/v2026.10.20). Download its **Source code (zip)**, or [download the tagged repository ZIP](https://github.com/epilepsyassociates-creator/marknav-manual-navigation/archive/refs/tags/v2026.10.20.zip).
 
-## What MarkNav Does
+The versioned repository contains the complete workflow at its root:
 
-MarkNav helps clinical neuro teams prepare MRI images for manual target marking:
+- `MarkNav.py`
+- `support_DICOM_converter_DO_NOT_OPEN_DIRECTLY.py`
+- `requirements.txt`
+- `README.md`
+- `SHA256_v2026.10.20.txt`
 
-1. You choose one patient MRI DICOM folder.
-2. MarkNav finds the T1 and FLAIR series.
-3. MarkNav converts them to NIfTI.
-4. MarkNav aligns FLAIR onto T1.
-5. ITK-SNAP opens automatically for manual target drawing.
-6. After the target is saved, MarkNav exports DICOM for navigation.
+This update provides Python source, not a rebuilt macOS or Windows installer. The April 2026 installer remains a separate historical package and does not contain these corrections.
 
-No MATLAB is required.
+### What changed
 
-## Download
+The corrected exporter checks the dimensions, spacing, origin and direction of the saved mask and aligned images against T1, as well as finite image/mask values and a nonempty, nonnegative target mask. It stages the four series before replacing previous outputs. A handled generation failure preserves the prior export. The derived series share a new study and frame of reference, with separate series and image identifiers.
 
-Open the latest release page:
+These checks concern the transfer of a saved marking. Clinical target selection remains the treating team's decision. Registration accuracy, quantitative spatial accuracy, navigation-platform compatibility, clinical feasibility and clinical benefit have not been established by this descriptive workflow.
 
-https://github.com/epilepsyassociates-creator/marknav-manual-navigation/releases/latest
+## What you need
 
-Download this file:
+- Python **3.10 or later** and an isolated Python environment.
+- [ITK-SNAP](https://www.itksnap.org/download/snap/) installed separately for manual target marking.
+- The three implementation files kept together: `MarkNav.py`, `support_DICOM_converter_DO_NOT_OPEN_DIRECTLY.py` and `requirements.txt`.
 
-```text
-MarkNav_Manual_Navigation_CLEAN_SEQUENCED_20260425.zip
+The Python requirements are NumPy, pydicom, SimpleITK and NiBabel. This source distribution does not automatically install them. Use the steps below. No MATLAB is required.
+
+## Run the source workflow
+
+Extract the v2026.10.20 repository ZIP. Open a terminal in the extracted folder containing `MarkNav.py` and `requirements.txt`. The examples below use placeholder paths; select your own MRI folder and a new output folder.
+
+### macOS or Linux
+
+Create an environment and install the requirements:
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-Direct download link:
+Prepare the images:
 
-https://github.com/epilepsyassociates-creator/marknav-manual-navigation/releases/download/v2026.04.25/MarkNav_Manual_Navigation_CLEAN_SEQUENCED_20260425.zip
-
-## After Download
-
-1. Unzip the file.
-2. Open the folder named:
-
-```text
-MarkNav_RELEASE
+```sh
+python MarkNav.py prepare --dicom "/path/to/MRI_DICOM" --output "/path/to/new_output"
 ```
 
-3. First open:
+### Windows PowerShell
 
-```text
-00_START_HERE_READ_ME_FIRST.txt
+Create an environment and install the requirements:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-That file repeats the exact click sequence.
+Prepare the images:
 
-## macOS Pathway
-
-Use these files inside `MarkNav_RELEASE`:
-
-```text
-01_macOS_INSTALL_dependencies.command
-02_macOS_RUN_MarkNav.command
+```powershell
+.\.venv\Scripts\python.exe MarkNav.py prepare --dicom "C:\path\to\MRI_DICOM" --output "C:\path\to\new_output"
 ```
 
-Step by step:
+### Review and mark the target
 
-1. Double-click `01_macOS_INSTALL_dependencies.command`.
-2. Wait until it says install complete.
-3. Double-click `02_macOS_RUN_MarkNav.command`.
-4. MarkNav opens.
-5. Choose the patient MRI DICOM folder.
-6. Choose or confirm the output folder.
-7. Click `Prepare + Open ITK-SNAP`.
-8. Draw the target in ITK-SNAP and save it.
-9. Reopen MarkNav and click `Export DICOM`.
+1. MarkNav identifies candidate T1 and FLAIR series from DICOM metadata and converts them to NIfTI.
+2. It rigidly aligns and resamples FLAIR onto the T1 grid, creates an empty mask, and opens ITK-SNAP when that application is found.
+3. Review the selected series and their alignment. Acquisition names vary, so automatic series selection needs clinical review.
+4. Draw the intended target in ITK-SNAP and save it as `manual_target_mask.nii` in the output folder.
+5. Export the saved marking.
 
-## Windows Pathway
+On macOS/Linux, in the activated environment:
 
-Use these files inside `MarkNav_RELEASE`:
-
-```text
-01_Windows_INSTALL_dependencies.bat
-02_Windows_RUN_MarkNav.bat
+```sh
+python MarkNav.py export --output "/path/to/new_output"
 ```
 
-Step by step:
+On Windows PowerShell:
 
-1. Double-click `01_Windows_INSTALL_dependencies.bat`.
-2. Wait until it says install complete.
-3. Double-click `02_Windows_RUN_MarkNav.bat`.
-4. Follow the prompts in the command window.
-5. Choose option `1` to prepare and open ITK-SNAP.
-6. Draw the target in ITK-SNAP and save it.
-7. Run MarkNav again.
-8. Choose option `2` to export DICOM.
-
-## What You Need Installed
-
-MarkNav installs its Python dependencies automatically.
-
-You still need ITK-SNAP installed separately.
-
-### Dependency Download Links
-
-Install these first if they are missing:
-
-| Dependency | Who needs it | Download link |
-| --- | --- | --- |
-| Python 3 | macOS and Windows users, required for MarkNav scripts | [Python official downloads](https://www.python.org/downloads/) |
-| ITK-SNAP | macOS and Windows users, required for manual target drawing | [ITK-SNAP official downloads](https://www.itksnap.org/download/snap/) |
-
-Python packages installed by the MarkNav installer:
-
-| Python package | Purpose | Link |
-| --- | --- | --- |
-| `numpy` | Array and mask processing | [numpy on PyPI](https://pypi.org/project/numpy/) |
-| `pydicom` | DICOM reading and writing | [pydicom on PyPI](https://pypi.org/project/pydicom/) |
-| `SimpleITK` | DICOM/NIfTI conversion and image registration | [SimpleITK on PyPI](https://pypi.org/project/SimpleITK/) |
-
-You usually do not need to install the Python packages manually. The `01_*_INSTALL_dependencies` file installs them for you.
-
-Expected ITK-SNAP locations:
-
-```text
-macOS:
-/Applications/ITK-SNAP.app
-
-Windows:
-Program Files / ITK-SNAP
+```powershell
+.\.venv\Scripts\python.exe MarkNav.py export --output "C:\path\to\new_output"
 ```
 
-If ITK-SNAP is installed somewhere else, set `ITKSNAP_EXE` to the full ITK-SNAP executable path.
+ITK-SNAP is normally located at `/Applications/ITK-SNAP.app` on macOS or under Program Files on Windows. If it is not found, set `ITKSNAP_EXE` to the full ITK-SNAP executable path. An exported image must still be checked on the intended viewing or navigation platform.
 
-## Files You Should Click
+## Understand the exported images
 
-Use only these beginner-facing files:
+Four series are written under `DICOM_FOR_NAVIGATION`:
 
-```text
-00_START_HERE_READ_ME_FIRST.txt
-01_macOS_INSTALL_dependencies.command
-02_macOS_RUN_MarkNav.command
-01_Windows_INSTALL_dependencies.bat
-02_Windows_RUN_MarkNav.bat
-03_FULL_INSTRUCTIONS_AND_OUTPUTS.txt
-```
+| Folder | Contents |
+| --- | --- |
+| `T1_raw_DICOM` | Unmarked derived T1 images |
+| `FLAIR_on_T1_raw_DICOM` | Unmarked derived FLAIR images on the T1 grid |
+| `T1_with_manual_target_DICOM` | Derived T1 images with target voxels encoded at 4095 |
+| `FLAIR_with_manual_target_DICOM` | Derived FLAIR-on-T1 images with target voxels encoded at 4095 |
 
-## Files You Should Not Click
+Despite the historical `raw` folder names, these are regenerated images with normalized background intensities, not copies of the original scanner DICOM data. All positive mask labels are combined. A target color shown in ITK-SNAP is not preserved as a color segmentation, and the exporter does not create a separate DICOM SEG object or RT structure set. The original NIfTI mask remains available for editing. Original patient and study identifiers are not retained in the derived series.
 
-These are support files used by MarkNav:
+Manual target selection does not remove the need for technical verification. Review the selected series, registration and saved marking, then check orientation and target position on the intended platform before clinical use. The workflow's clinical performance and successful import into a particular navigation platform remain to be established.
 
-```text
-support_MarkNav_pipeline_DO_NOT_OPEN_DIRECTLY.py
-support_DICOM_converter_DO_NOT_OPEN_DIRECTLY.py
-support_python_requirements_DO_NOT_OPEN_DIRECTLY.txt
-support_macOS_UI_binary_DO_NOT_OPEN_DIRECTLY
-support_macOS_UI_source_DO_NOT_OPEN_DIRECTLY.swift
-```
+## April 2026 installer: historical version
 
-Leave them in the folder. Do not rename or delete them.
+The [v2026.04.25 release](https://github.com/epilepsyassociates-creator/marknav-manual-navigation/releases/tag/v2026.04.25) contains the original macOS/Windows launcher package:
 
-## Expected Output Files
+`MarkNav_Manual_Navigation_CLEAN_SEQUENCED_20260425.zip`
 
-Inside the patient output folder, MarkNav creates:
+That release asset and its original checksum file, `SHA256_CURRENT_RELEASE.txt`, remain unchanged. Despite that historical filename, its checksum applies to the April installer only. The earlier installer is distinct from the corrected source above and does not contain the current full-geometry input checks. Its original instructions remain inside that historical download.
+
+## Source checksums
+
+`SHA256_v2026.10.20.txt` records the hashes of the three implementation files. These identify the source files, not the compressed GitHub archive. The workflow source SHA256 is:
 
 ```text
-T1.nii
-FLAIR.nii
-FLAIR_on_T1.nii
-manual_target_mask.nii
-README_MANUAL_NAVIGATION.txt
-ITK_SNAP_NEXT_STEPS.txt
-open_manual_segmentation.js
+0119a1ca5944cbc19c3e71ba6d7c0c84ba647423f29831e04ec4410ca9bf19bf
 ```
 
-After export, DICOM files are created here:
-
-```text
-DICOM_FOR_NAVIGATION/T1_raw_DICOM
-DICOM_FOR_NAVIGATION/FLAIR_on_T1_raw_DICOM
-DICOM_FOR_NAVIGATION/T1_with_manual_target_DICOM
-DICOM_FOR_NAVIGATION/FLAIR_with_manual_target_DICOM
-```
-
-## Safety Check
-
-MarkNav will not export DICOM if:
-
-```text
-manual_target_mask.nii
-```
-
-is empty.
-
-This is intentional. The neurologist must save a non-empty segmentation mask first.
-
-## Common Problems
-
-### macOS says the command file cannot be opened
-
-Right-click the file and choose `Open`.
-
-If macOS asks for confirmation, choose `Open` again.
-
-### ITK-SNAP does not open
-
-Install ITK-SNAP, then run MarkNav again.
-
-If ITK-SNAP is installed in a custom location, set `ITKSNAP_EXE`.
-
-### Export refuses to run
-
-Open `manual_target_mask.nii` in ITK-SNAP and confirm the target was drawn and saved.
-
-An empty mask will be rejected.
-
-### I clicked a support file by mistake
-
-Close it and go back to:
-
-```text
-00_START_HERE_READ_ME_FIRST.txt
-```
-
-## Release Checksum
-
-SHA-256:
-
-```text
-bc955a4a64873cab450658715bcdab6270af4d0d566d67593da8ba5acff7a7e7
-```
+No license grant is added by this source update.
 
 ## Contact
 
-For any assistance, please mail:
-
-```text
-epilepsyassociates@gmail.com
-```
-
-Or you know where to reach us.
+For assistance: contact@gujaratepilepsy.com
